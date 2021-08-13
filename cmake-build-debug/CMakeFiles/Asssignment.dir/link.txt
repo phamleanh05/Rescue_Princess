@@ -1,0 +1,3 @@
+"F:\CLION\CLion 2020.2.4\bin\cmake\win\bin\cmake.exe" -E rm -f CMakeFiles\Asssignment.dir/objects.a
+F:\CLION\mingw64\bin\ar.exe cr CMakeFiles\Asssignment.dir/objects.a @CMakeFiles\Asssignment.dir\objects1.rsp
+F:\CLION\mingw64\bin\g++.exe -g   -Wl,--whole-archive CMakeFiles\Asssignment.dir/objects.a -Wl,--no-whole-archive  -o Asssignment.exe -Wl,--out-implib,libAsssignment.dll.a -Wl,--major-image-version,0,--minor-image-version,0 @CMakeFiles\Asssignment.dir\linklibs.rsp
