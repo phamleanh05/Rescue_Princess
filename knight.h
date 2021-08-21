@@ -24,6 +24,7 @@ const int MUSHKNIGHT = 14;
 const int Remedy = 15;
 const int PhoenixDown = 16;
 const int MERLIN = 17;
+const int NINAdeRings = 18;
 const int EVENT_SIZE = 100;
 const int MAX_CHARACTER_EACH_LINE = 250;
 
@@ -43,9 +44,10 @@ struct Status
 {
     int magic = -1;
     int frog = -1;
+    int Mythril = -1;
+    int Physical = 7;
     bool Excal = false;
     bool Expoor = false;
-    int Mythril = -1;
 };
 
 void checkMax(knight &theKnight)
@@ -91,7 +93,21 @@ void checkHP(knight &theKnight, int MaxHP, bool &process) // MaxHP = Hp lúc đ�
     }
 }
 
-void checkStatus(knight &theKnight, Status &Knight, int firstLevel)
+bool checkFriend(int a, int b)
+{
+    int sum1 = 0, sum2 = 0;
+    for (int i = 1; i <= a; i++)
+        if (a % i == 0)
+            sum1 += i;
+    for (int i = 1; i <= b; i++)
+    {
+        if (b % i == 0)
+            sum2 += i;
+    }
+    return (sum1 / a) == (sum2 / b);
+}
+
+void checkStatus(knight &theKnight, Status &Knight,int MaxHP, int firstLevel)
 {
     if(Knight.magic > 0)
     {
@@ -99,7 +115,10 @@ void checkStatus(knight &theKnight, Status &Knight, int firstLevel)
         if(Knight.magic == 0) {
             theKnight.HP = theKnight.HP * 5;
             Knight.magic = -1;
-            checkMax(theKnight);
+            if(theKnight.HP >= MaxHP)
+            {
+                theKnight.HP = MaxHP;
+            }
         }
     }
 
@@ -126,6 +145,7 @@ void checklevel0(knight &theKnight, Status &Knight, int theEvent, int i, int fir
     {
         if (Knight.Mythril > 0) {
             Knight.Mythril--;
+            Knight.Physical --;
             theKnight.HP = theKnight.HP;
             if (Knight.Mythril == 0) {
                 Knight.Mythril = -1;
@@ -149,9 +169,10 @@ void checklevel0(knight &theKnight, Status &Knight, int theEvent, int i, int fir
         } else if (theKnight.level == levelO) {
             theKnight.level = theKnight.level;
             theKnight.DF = theKnight.DF;
-        } else if (theKnight.level < levelO) {
+        } else if (theKnight.level < levelO && 0 < Knight.Physical < 7) {
             if (Knight.Mythril > 0) {
                 Knight.Mythril--;
+                Knight.Physical --;
                 theKnight.HP = theKnight.HP;
                 if (Knight.Mythril == 0) {
                     Knight.Mythril = -1;
@@ -167,13 +188,13 @@ void checklevel0(knight &theKnight, Status &Knight, int theEvent, int i, int fir
             }
         }
     }
-    checkStatus(theKnight, Knight, firstLevel);
+    checkStatus(theKnight, Knight, MaxHP, firstLevel);
 }
 
 void ShamanVajsh(knight &theKnight, Status &Knight, int i, int firstLevel, int MaxHP, int *arrEvent, bool &process){
     if(Knight.magic > 0 || Knight.frog > 0)
     {
-        checkStatus(theKnight, Knight, firstLevel);
+        checkStatus(theKnight, Knight, MaxHP, firstLevel);
     }
     else {
         i++;
@@ -288,11 +309,24 @@ void Mushghost(knight &theKnight)
     }
 }
 
-void Merlin(knight &theKnight, Status &Knight, int MaxHP){
+void Merlin(knight &theKnight, Status &Knight, int MaxHP, int firstLevel){
     if(Knight.magic > 0 || Knight.frog >0)
     {
         Knight.magic = -1;
+        if(Knight.magic == -1)
+        {
+            theKnight.HP = theKnight.HP * 5;
+            if(theKnight.HP >= MaxHP)
+            {
+                theKnight.HP = MaxHP;
+            }
+        }
+
         Knight.frog = -1;
+        if(Knight.frog == -1)
+        {
+            theKnight.level = firstLevel;
+        }
         theKnight.level ++;
         checkMax(theKnight);
         theKnight.HP = MaxHP;
@@ -301,6 +335,48 @@ void Merlin(knight &theKnight, Status &Knight, int MaxHP){
         theKnight.level ++;
         checkMax(theKnight);
         theKnight.HP = MaxHP;
+    }
+}
+
+void NINA(knight &theKnight, Status &Knight, int MaxHP, int firstLevel)
+{
+    bool checkfriend = checkFriend(theKnight.HP, theKnight.gold);
+    if(checkfriend)
+    {
+        Knight.magic = -1;
+        Knight.frog = -1;
+        theKnight.HP = MaxHP;
+        return;
+    }
+    else {
+        if (theKnight.gold > 50) {
+            if (Knight.magic > 0 || Knight.frog > 0) {
+                theKnight.gold -= 50;
+                Knight.magic = -1;
+                if (Knight.magic == -1) {
+                    theKnight.HP = theKnight.HP * 5;
+                    if (theKnight.HP >= MaxHP) {
+                        theKnight.HP = MaxHP;
+                    }
+                }
+
+                Knight.frog = -1;
+                if (Knight.frog == -1) {
+                    theKnight.level = firstLevel;
+                }
+
+                if (theKnight.gold > 0 && theKnight.HP < MaxHP) {
+                    theKnight.gold--;
+                    theKnight.HP++;
+                }
+            } else {
+                int a = MaxHP - theKnight.HP;
+                if (a <= theKnight.gold) {
+                    theKnight.HP = MaxHP;
+                    theKnight.gold -= a;
+                }
+            }
+        }
     }
 }
 int startJourney(knight theKnight, int nEvent, int *arrEvent){
@@ -351,11 +427,17 @@ int startJourney(knight theKnight, int nEvent, int *arrEvent){
                 break;
 
             case MYTHRIL:
-                Knight.Mythril = 5;
+                if(Knight.Physical == 7) {
+                    Knight.Mythril = 5;
+                    Knight.Physical--;
+                    if(Knight.Physical == 0){
+                        Knight.Physical = 7;
+                    }
+                }
                 break;
 
             case EXPOOR:
-                if(theKnight.level > 5)
+                if(theKnight.level >= 5)
                 {
                     Knight.Expoor = false;
                 }
@@ -397,7 +479,11 @@ int startJourney(knight theKnight, int nEvent, int *arrEvent){
                 break;
 
             case MERLIN:
-                Merlin(theKnight, Knight, MaxHP);
+                Merlin(theKnight, Knight, MaxHP, firstLevel);
+                break;
+
+            case NINAdeRings:
+                NINA(theKnight, Knight, MaxHP, firstLevel);
                 break;
         }
     }
