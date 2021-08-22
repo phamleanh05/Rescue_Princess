@@ -440,10 +440,52 @@ void NINA(knight &theKnight, Status &Knight, int MaxHP, int firstLevel)
         }
     }
 }
+bool SumAbyss(char *str){
+    int sum = 0;
+    int count = 0;
+    for (int i = 0; i < strlen(str); i++) {
+        for (int j = 0; j < strlen(str); j++) {
+            if (str[i] - str[j] == 0) {
+                count++;
+            }
+        }
+        if (count == 1) {
+            int a = str[i] - '0';
+            sum += a;
+        }
+        count = 0;
+    }
+    if (sum > 15){
+        return true;
+    }
+    else{
+        return false;
+    }
+}
 
-void theAbyss()
+void theAbyss(knight &theKnight, int i, int *arrEvent, bool process)
 {
-
+    int code2[6]={theKnight.HP, theKnight.DF, theKnight.level, theKnight.remedy, theKnight.gold, theKnight.phoenixdown};
+    string codeabyss;
+    for (int j = 0; j < i; j++) {
+        char arr[10];
+        itoa(arrEvent[j], arr, 10);
+        codeabyss+= arr;
+    }
+    for(int j = 0; j < 6; j++){
+        char arr[10];
+        itoa(code2[j], arr, 10);
+        codeabyss+= arr;
+    }
+    char* code = new char[codeabyss.size() + 1];
+    strcpy(code, codeabyss.c_str());
+    if(SumAbyss(code)){
+        return;
+    }
+    else{
+        process = false;
+    }
+    delete[] code;
 }
 
 void checkKnight(knight &theKnight, Status &Knight, int MaxHP)
@@ -586,16 +628,17 @@ int startJourney(knight theKnight, int nEvent, int *arrEvent){
                 break;
 
             case ABYSS:
-                if(theKnight.gold > 50)
+                if(theKnight.gold >= 50)
                 {
-                    if(theKnight.level < 7)
-                    {
-                        theKnight.gold -= 50;
-                    }
+                    theKnight.gold -= 50;
+                }
+                else if(theKnight.level <= 7)
+                {
+                    break;
                 }
                 else
                 {
-                    theAbyss();
+                    theAbyss(theKnight, i,arrEvent,process);
                 }
                 break;
 
