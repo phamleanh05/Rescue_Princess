@@ -26,7 +26,12 @@ const int PhoenixDown = 16;
 const int MERLIN = 17;
 const int NINAdeRings = 18;
 const int ABYSS = 19;
+const int TIMEGATE = 20;
+const int GUINEVERE = 21;
+const int LIGHTWING = 22;
 const int ODIN = 23;
+const int DragonSword = 24;
+const int BOWSER = 99;
 const int EVENT_SIZE = 100;
 const int MAX_CHARACTER_EACH_LINE = 250;
 
@@ -49,8 +54,14 @@ struct Status
     int Mythril = -1;
     int Physical = 7;
     int meetOdin = -1;
+    bool ARTHUR = false;
+    bool LANCELOT = false;
+    bool PALADIN = false;
+    bool Dragon = false;
+    bool Timegate = false;
     bool Excal = false;
     bool Expoor = false;
+    bool DragonSword = false;
 };
 
 void checkMax(knight &theKnight)
@@ -80,18 +91,25 @@ void checkMax(knight &theKnight)
         theKnight.phoenixdown = 99;
     }
 }
-void checkHP(knight &theKnight, int MaxHP, bool &process) // MaxHP = Hp lúc đầu
+void checkHP(knight &theKnight, Status &Knight, int i, int s, int MaxHP, bool &process) // MaxHP = Hp lúc đầu
 {
-    if(theKnight.HP <= 0)
+    if(Knight.Timegate == true)
     {
-        if(theKnight.phoenixdown == 0)
+        i = s;
+    }
+    else
+    {
+        if(theKnight.HP <= 0)
         {
-            process = false;
-        }
-        else if(theKnight.phoenixdown > 0)
-        {
-            theKnight.phoenixdown--;
-            theKnight.HP = MaxHP;
+            if(theKnight.phoenixdown == 0)
+            {
+                process = false;
+            }
+            else if(theKnight.phoenixdown > 0)
+            {
+                theKnight.phoenixdown--;
+                theKnight.HP = MaxHP;
+            }
         }
     }
 }
@@ -140,59 +158,38 @@ void checklevel0(knight &theKnight, Status &Knight, int theEvent, int i, int fir
     int MaxHP = theKnight.HP;
     double base[6]= {0, 1, 2.5, 5.5, 7.5, 9.5};
     int gold[6] = {0, 10, 20, 30, 40, 50};
+    int s;
     i++;
     int b = i%10;
     int levelO = i>6? (b> 5? b : 5) : b;
     double baseDamage = base[theEvent];
     int damage = baseDamage * levelO * 10;
-    if(Knight.meetOdin > 0)
+    if(Knight.ARTHUR == true || Knight.PALADIN == true)
     {
-        Knight.meetOdin--;
-        if (Knight.meetOdin == 0)
-        {
-            Knight.meetOdin = -2;
-        }
-        if(Knight.Mythril >0)
-        {
-            Knight.Mythril --;
-            if (Knight.Mythril == 0) {
-                Knight.Mythril = -1;
-            }
-        }
         theKnight.level = theKnight.level + 1;
         theKnight.DF = theKnight.DF + 1;
         theKnight.gold = theKnight.gold + gold[theEvent];
         checkMax(theKnight);
-        checkStatus(theKnight,Knight,MaxHP,firstLevel);
     }
     else {
-        if (Knight.Expoor == true) {
+        if (Knight.meetOdin > 0) {
+            Knight.meetOdin--;
+            if (Knight.meetOdin == 0) {
+                Knight.meetOdin = -2;
+            }
             if (Knight.Mythril > 0) {
                 Knight.Mythril--;
-                Knight.Physical--;
-                theKnight.HP = theKnight.HP;
                 if (Knight.Mythril == 0) {
                     Knight.Mythril = -1;
                 }
-            } else {
-                if (damage > theKnight.DF) {
-                    theKnight.HP = theKnight.HP + theKnight.DF - damage;
-                    checkHP(theKnight, MaxHP, process);
-                } else {
-                    theKnight.HP -= damage;
-                    checkHP(theKnight, MaxHP, process);
-                }
             }
+            theKnight.level = theKnight.level + 1;
+            theKnight.DF = theKnight.DF + 1;
+            theKnight.gold = theKnight.gold + gold[theEvent];
+            checkMax(theKnight);
+            checkStatus(theKnight, Knight, MaxHP, firstLevel);
         } else {
-            if (theKnight.level > levelO) {
-                theKnight.level = theKnight.level + 1;
-                theKnight.DF = theKnight.DF + 1;
-                theKnight.gold = theKnight.gold + gold[theEvent];
-                checkMax(theKnight);
-            } else if (theKnight.level == levelO) {
-                theKnight.level = theKnight.level;
-                theKnight.DF = theKnight.DF;
-            } else if (theKnight.level < levelO && 0 < Knight.Physical < 7) {
+            if (Knight.Expoor == true) {
                 if (Knight.Mythril > 0) {
                     Knight.Mythril--;
                     Knight.Physical--;
@@ -203,15 +200,42 @@ void checklevel0(knight &theKnight, Status &Knight, int theEvent, int i, int fir
                 } else {
                     if (damage > theKnight.DF) {
                         theKnight.HP = theKnight.HP + theKnight.DF - damage;
-                        checkHP(theKnight, MaxHP, process);
+                        checkHP(theKnight, Knight, i, s, MaxHP, process);
                     } else {
                         theKnight.HP -= damage;
-                        checkHP(theKnight, MaxHP, process);
+                        checkHP(theKnight, Knight, i, s, MaxHP, process);
+                    }
+                }
+            } else {
+                if (theKnight.level > levelO) {
+                    theKnight.level = theKnight.level + 1;
+                    theKnight.DF = theKnight.DF + 1;
+                    theKnight.gold = theKnight.gold + gold[theEvent];
+                    checkMax(theKnight);
+                } else if (theKnight.level == levelO) {
+                    theKnight.level = theKnight.level;
+                    theKnight.DF = theKnight.DF;
+                } else if (theKnight.level < levelO && 0 < Knight.Physical < 7) {
+                    if (Knight.Mythril > 0) {
+                        Knight.Mythril--;
+                        Knight.Physical--;
+                        theKnight.HP = theKnight.HP;
+                        if (Knight.Mythril == 0) {
+                            Knight.Mythril = -1;
+                        }
+                    } else {
+                        if (damage > theKnight.DF) {
+                            theKnight.HP = theKnight.HP + theKnight.DF - damage;
+                            checkHP(theKnight, Knight, i, s, MaxHP, process);
+                        } else {
+                            theKnight.HP -= damage;
+                            checkHP(theKnight, Knight, i, s, MaxHP, process);
+                        }
                     }
                 }
             }
+            checkStatus(theKnight, Knight, MaxHP, firstLevel);
         }
-        checkStatus(theKnight, Knight, MaxHP, firstLevel);
     }
 }
 
@@ -219,71 +243,76 @@ void ShamanVajsh(knight &theKnight, Status &Knight, int i, int firstLevel, int M
     i++;
     int b = i % 10;
     int levelO = i > 6 ? (b > 5 ? b : 5) : b;
-    if(Knight.meetOdin > 0)
+    if(Knight.ARTHUR == true || Knight.PALADIN == true)
     {
-        Knight.meetOdin--;
-        if (Knight.meetOdin == 0)
-        {
-            Knight.meetOdin = -2;
-        }
         theKnight.level = theKnight.level + 2;
         theKnight.DF = theKnight.DF + 2;
         checkMax(theKnight);
-        checkStatus(theKnight, Knight, MaxHP, firstLevel);
     }
     else {
-        if (Knight.magic > 0 || Knight.frog > 0) {
+        if (Knight.meetOdin > 0) {
+            Knight.meetOdin--;
+            if (Knight.meetOdin == 0) {
+                Knight.meetOdin = -2;
+            }
+            theKnight.level = theKnight.level + 2;
+            theKnight.DF = theKnight.DF + 2;
+            checkMax(theKnight);
             checkStatus(theKnight, Knight, MaxHP, firstLevel);
         } else {
-            if (Knight.Expoor == true) {
-                if (theKnight.level < levelO && arrEvent[i - 1] == 6) {
-                    Knight.magic = 3;
-                    theKnight.HP = theKnight.HP / 5;
-                    if (theKnight.remedy >= 1) {
-                        theKnight.remedy--;
-                        theKnight.HP = MaxHP;
-                        Knight.magic = -1;
-                    } else {
-                        if (theKnight.HP < 5) {
-                            theKnight.HP = 1;
-                        }
-                    }
-                } else if (theKnight.level < levelO && arrEvent[i - 1] == 7) {
-                    Knight.frog = 3;
-                    theKnight.level = 1;
-                    if (theKnight.remedy >= 1) {
-                        theKnight.remedy--;
-                        theKnight.level = firstLevel;
-                        Knight.frog = -1;
-                    }
-                }
+            if (Knight.magic > 0 || Knight.frog > 0) {
+                checkStatus(theKnight, Knight, MaxHP, firstLevel);
             } else {
-                if (theKnight.level > levelO) {
-                    theKnight.level = theKnight.level + 2;
-                    theKnight.DF = theKnight.DF + 2;
-                    checkMax(theKnight);
-                } else if (theKnight.level == levelO) {
-                    theKnight.level = theKnight.level;
-                    theKnight.DF = theKnight.DF;
-                } else if (theKnight.level < levelO && arrEvent[i - 1] == 6) {
-                    Knight.magic = 3;
-                    theKnight.HP = theKnight.HP / 5;
-                    if (theKnight.remedy >= 1) {
-                        theKnight.remedy--;
-                        theKnight.HP = MaxHP;
-                        Knight.magic = -1;
-                    } else {
-                        if (theKnight.HP < 5) {
-                            theKnight.HP = 1;
+                if (Knight.Expoor == true) {
+                    if (theKnight.level < levelO && arrEvent[i - 1] == 6) {
+                        Knight.magic = 3;
+                        theKnight.HP = theKnight.HP / 5;
+                        if (theKnight.remedy >= 1) {
+                            theKnight.remedy--;
+                            theKnight.HP = MaxHP;
+                            Knight.magic = -1;
+                        } else {
+                            if (theKnight.HP < 5) {
+                                theKnight.HP = 1;
+                            }
+                        }
+                    } else if (theKnight.level < levelO && arrEvent[i - 1] == 7) {
+                        Knight.frog = 3;
+                        theKnight.level = 1;
+                        if (theKnight.remedy >= 1) {
+                            theKnight.remedy--;
+                            theKnight.level = firstLevel;
+                            Knight.frog = -1;
                         }
                     }
-                } else if (theKnight.level < levelO && arrEvent[i - 1] == 7) {
-                    Knight.frog = 3;
-                    theKnight.level = 1;
-                    if (theKnight.remedy >= 1) {
-                        theKnight.remedy--;
-                        theKnight.level = firstLevel;
-                        Knight.frog = -1;
+                } else {
+                    if (theKnight.level > levelO) {
+                        theKnight.level = theKnight.level + 2;
+                        theKnight.DF = theKnight.DF + 2;
+                        checkMax(theKnight);
+                    } else if (theKnight.level == levelO) {
+                        theKnight.level = theKnight.level;
+                        theKnight.DF = theKnight.DF;
+                    } else if (theKnight.level < levelO && arrEvent[i - 1] == 6) {
+                        Knight.magic = 3;
+                        theKnight.HP = theKnight.HP / 5;
+                        if (theKnight.remedy >= 1) {
+                            theKnight.remedy--;
+                            theKnight.HP = MaxHP;
+                            Knight.magic = -1;
+                        } else {
+                            if (theKnight.HP < 5) {
+                                theKnight.HP = 1;
+                            }
+                        }
+                    } else if (theKnight.level < levelO && arrEvent[i - 1] == 7) {
+                        Knight.frog = 3;
+                        theKnight.level = 1;
+                        if (theKnight.remedy >= 1) {
+                            theKnight.remedy--;
+                            theKnight.level = firstLevel;
+                            Knight.frog = -1;
+                        }
                     }
                 }
             }
@@ -327,18 +356,18 @@ void checkExcal(knight &theKnight, Status &Knight, int theEvent, int i, int firs
 
 void Mushghost(knight &theKnight)
 {
-    if(theKnight.HP < 51)
+    if(theKnight.HP <= 51)
     {
         theKnight.HP = 1;
     }
-    else if (theKnight.DF < 6)
+    if (theKnight.DF <= 6)
     {
         theKnight.DF = 1;
     }
-    else{
-        theKnight.HP -= 50;
-        theKnight.DF -= 5;
-    }
+
+    theKnight.HP -= 50;
+    theKnight.DF -= 5;
+
 }
 
 void Merlin(knight &theKnight, Status &Knight, int MaxHP, int firstLevel){
@@ -416,6 +445,36 @@ void theAbyss()
 {
 
 }
+
+void checkKnight(knight &theKnight, Status &Knight, int MaxHP)
+{
+    if(MaxHP == 999)
+    {
+        Knight.ARTHUR = true;
+    }
+    if(MaxHP == 888)
+    {
+        Knight.LANCELOT = true;
+        if(theKnight.level%2 == 0)
+        {
+            Knight.ARTHUR = false;
+        }
+        else
+        {
+            Knight.ARTHUR = true;
+        }
+    }
+    int count = 0;
+    for(int i = 2; i <= sqrt(MaxHP); i++){
+        if(MaxHP % i == 0){
+            count++;
+        }
+    }
+    if(MaxHP > 2 && count == 0)
+    {
+        Knight.PALADIN = true;
+    }
+}
 int startJourney(knight theKnight, int nEvent, int *arrEvent){
     bool process = true;
     int result;
@@ -424,6 +483,7 @@ int startJourney(knight theKnight, int nEvent, int *arrEvent){
     int MaxHP = theKnight.HP;
     for (int i = 0; i < nEvent; i++)
     {
+        checkKnight(theKnight, Knight, MaxHP);
         int theEvent = arrEvent[i];
         switch (theEvent)
         {
@@ -474,7 +534,7 @@ int startJourney(knight theKnight, int nEvent, int *arrEvent){
                 break;
 
             case EXPOOR:
-                if(theKnight.level >= 5)
+                if(theKnight.level >= 5 || Knight.ARTHUR == true || Knight.PALADIN == true)
                 {
                     Knight.Expoor = false;
                 }
@@ -496,7 +556,9 @@ int startJourney(knight theKnight, int nEvent, int *arrEvent){
                 break;
 
             case MUSHGHOST:
-                Mushghost(theKnight);
+                if(Knight.PALADIN == false) {
+                    Mushghost(theKnight);
+                }
                 break;
 
             case MUSHKNIGHT:
@@ -537,6 +599,18 @@ int startJourney(knight theKnight, int nEvent, int *arrEvent){
                 }
                 break;
 
+            case TIMEGATE:
+                Knight.Timegate = true;
+                break;
+
+            case GUINEVERE:
+
+                break;
+
+            case LIGHTWING:
+                i = i+3;
+                break;
+
             case ODIN:
                 if(Knight.meetOdin == -1)
                 {
@@ -546,6 +620,31 @@ int startJourney(knight theKnight, int nEvent, int *arrEvent){
                 else if(Knight.meetOdin == -2)
                 {
                     break;
+                }
+                break;
+            case DragonSword:
+                if(Knight.Dragon == true)
+                {
+                    Knight.DragonSword = true;
+                }
+                break;
+
+            case BOWSER:
+                if(Knight.ARTHUR == true || Knight.LANCELOT == true)
+                {
+                    theKnight.level = 10;
+                }
+                else
+                {
+                    if(Knight.PALADIN == true && theKnight.level >= 8 || theKnight.level == 10 || Knight.DragonSword == true)
+                    {
+                        theKnight.level = 10;
+                    }
+                    else
+                    {
+                        process = false;
+                        break;
+                    }
                 }
                 break;
         }
