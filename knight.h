@@ -163,6 +163,7 @@ void checklevel0(knight &theKnight, Status &Knight, int theEvent, int i, int fir
         theKnight.DF = theKnight.DF + 1;
         theKnight.gold = theKnight.gold + gold[theEvent];
         checkMax(theKnight);
+        checkStatus(theKnight,Knight,MaxHP,firstLevel);
     }
     else {
         if (Knight.Expoor == true) {
@@ -228,6 +229,7 @@ void ShamanVajsh(knight &theKnight, Status &Knight, int i, int firstLevel, int M
         theKnight.level = theKnight.level + 2;
         theKnight.DF = theKnight.DF + 2;
         checkMax(theKnight);
+        checkStatus(theKnight, Knight, MaxHP, firstLevel);
     }
     else {
         if (Knight.magic > 0 || Knight.frog > 0) {
