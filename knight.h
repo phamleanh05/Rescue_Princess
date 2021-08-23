@@ -153,6 +153,17 @@ void checkStatus(knight &theKnight, Status &Knight,int MaxHP, int firstLevel)
     }
 }
 
+int MushFibo(int num) {
+    int first = 0, two = 1;
+    int third = first + two;
+    while (third <= num) {
+        first = two;
+        two = third;
+        third = first + two;
+    }
+    return two;
+}
+
 void checklevel0(knight &theKnight, Status &Knight, int theEvent, int i, int firstLevel, bool &process)
 {
     int MaxHP = theKnight.HP;
@@ -250,17 +261,17 @@ void ShamanVajsh(knight &theKnight, Status &Knight, int i, int firstLevel, int M
         checkMax(theKnight);
     }
     else {
-        if (Knight.meetOdin > 0) {
-            Knight.meetOdin--;
-            if (Knight.meetOdin == 0) {
-                Knight.meetOdin = -2;
-            }
-            theKnight.level = theKnight.level + 2;
-            theKnight.DF = theKnight.DF + 2;
-            checkMax(theKnight);
+        if (Knight.magic > 0 || Knight.frog > 0) {
             checkStatus(theKnight, Knight, MaxHP, firstLevel);
         } else {
-            if (Knight.magic > 0 || Knight.frog > 0) {
+            if (Knight.meetOdin > 0) {
+                Knight.meetOdin--;
+                if (Knight.meetOdin == 0) {
+                    Knight.meetOdin = -2;
+                }
+                theKnight.level = theKnight.level + 2;
+                theKnight.DF = theKnight.DF + 2;
+                checkMax(theKnight);
                 checkStatus(theKnight, Knight, MaxHP, firstLevel);
             } else {
                 if (Knight.Expoor == true) {
@@ -488,6 +499,42 @@ void theAbyss(knight &theKnight, int i, int *arrEvent, bool process)
     delete[] code;
 }
 
+// check số chính phương
+int SquareNumber(float n)
+{
+    if ((float)sqrt(n) - (int)sqrt(n) == 0)
+    {
+        return 1;
+    }
+    return 0;
+}
+
+void KnightDragon(Status &Knight, int MaxHP)
+{
+    int x, y;
+    for (x = 2; x < 500; x++)
+    {
+        for (y = x; y < 500; y++)
+        {
+            if (sqrt(x*x + y * y) > 500) // sqrt(x*x + y*y) bé hơn 500 <=> z < 500 để nằm trong phạm 1000
+            {
+                break;
+            }
+            if (SquareNumber(x*x + y * y)) {
+                int sum = x + y + sqrt(x*x + y * y);
+                if (sum == 888)
+                {
+                    Knight.LANCELOT = true;
+                }
+                else if(sum == MaxHP)
+                {
+                    Knight.Dragon = true;
+                }
+            }
+        }
+    }
+}
+
 void checkKnight(knight &theKnight, Status &Knight, int MaxHP)
 {
     if(MaxHP == 999)
@@ -506,6 +553,7 @@ void checkKnight(knight &theKnight, Status &Knight, int MaxHP)
             Knight.ARTHUR = true;
         }
     }
+    //Paladin
     int count = 0;
     for(int i = 2; i <= sqrt(MaxHP); i++){
         if(MaxHP % i == 0){
@@ -516,6 +564,10 @@ void checkKnight(knight &theKnight, Status &Knight, int MaxHP)
     {
         Knight.PALADIN = true;
     }
+
+    //Dragon Knight
+    KnightDragon(Knight, MaxHP);
+
 }
 int startJourney(knight theKnight, int nEvent, int *arrEvent){
     bool process = true;
@@ -563,6 +615,7 @@ int startJourney(knight theKnight, int nEvent, int *arrEvent){
 
             case EXCALIBUR:
                 Knight.Excal = true;
+                checkStatus(theKnight, Knight, MaxHP, firstLevel);
                 break;
 
             case MYTHRIL:
@@ -573,6 +626,7 @@ int startJourney(knight theKnight, int nEvent, int *arrEvent){
                         Knight.Physical = 7;
                     }
                 }
+                checkStatus(theKnight, Knight, MaxHP, firstLevel);
                 break;
 
             case EXPOOR:
@@ -584,6 +638,7 @@ int startJourney(knight theKnight, int nEvent, int *arrEvent){
                 {
                     Knight.Expoor = true;
                 }
+                checkStatus(theKnight, Knight, MaxHP, firstLevel);
                 break;
 
             case MUSHMARIO:
@@ -592,62 +647,79 @@ int startJourney(knight theKnight, int nEvent, int *arrEvent){
                 {
                     theKnight.HP = MaxHP;
                 }
+                checkStatus(theKnight, Knight, MaxHP, firstLevel);
                 break;
 
             case MUSHFIBO:
+                theKnight.HP += MushFibo(theKnight.HP);
+                checkMax(theKnight);
+                checkStatus(theKnight, Knight, MaxHP, firstLevel);
                 break;
 
             case MUSHGHOST:
                 if(Knight.PALADIN == false) {
                     Mushghost(theKnight);
                 }
+                checkStatus(theKnight, Knight, MaxHP, firstLevel);
                 break;
 
             case MUSHKNIGHT:
                 MaxHP += 50;
                 theKnight.HP = MaxHP;
                 checkMax(theKnight);
+                checkStatus(theKnight, Knight, MaxHP, firstLevel);
                 break;
 
             case Remedy:
                 theKnight.remedy ++;
                 checkMax(theKnight);
+                checkStatus(theKnight, Knight, MaxHP, firstLevel);
                 break;
 
             case PhoenixDown:
                 theKnight.phoenixdown ++;
                 checkMax(theKnight);
+                checkStatus(theKnight, Knight, MaxHP, firstLevel);
                 break;
 
             case MERLIN:
                 Merlin(theKnight, Knight, MaxHP, firstLevel);
+                checkStatus(theKnight, Knight, MaxHP, firstLevel);
                 break;
 
             case NINAdeRings:
                 NINA(theKnight, Knight, MaxHP, firstLevel);
+                checkStatus(theKnight, Knight, MaxHP, firstLevel);
                 break;
 
             case ABYSS:
-                if(theKnight.gold >= 50)
+                if(Knight.meetOdin > 0)
                 {
-                    theKnight.gold -= 50;
+                    Knight.meetOdin --;
+                    break;
                 }
-                else if(theKnight.level <= 7)
+                if(theKnight.level >= 7)
                 {
                     break;
+                }
+                else if(theKnight.gold >= 50)
+                {
+                    theKnight.gold -= 50;
                 }
                 else
                 {
                     theAbyss(theKnight, i,arrEvent,process);
                 }
+                checkStatus(theKnight, Knight, MaxHP, firstLevel);
                 break;
 
             case TIMEGATE:
                 Knight.Timegate = true;
+                checkStatus(theKnight, Knight, MaxHP, firstLevel);
                 break;
 
             case GUINEVERE:
-
+                checkStatus(theKnight, Knight, MaxHP, firstLevel);
                 break;
 
             case LIGHTWING:
@@ -665,23 +737,32 @@ int startJourney(knight theKnight, int nEvent, int *arrEvent){
                     break;
                 }
                 break;
+
             case DragonSword:
                 if(Knight.Dragon == true)
                 {
                     Knight.DragonSword = true;
+                    cout << "hiep sy rong" << endl;
                 }
+                else
+                {
+                    cout<<"not"<<endl;
+                }
+                checkStatus(theKnight, Knight, MaxHP, firstLevel);
                 break;
 
             case BOWSER:
                 if(Knight.ARTHUR == true || Knight.LANCELOT == true)
                 {
                     theKnight.level = 10;
+                    checkStatus(theKnight, Knight, MaxHP, firstLevel);
                 }
                 else
                 {
                     if(Knight.PALADIN == true && theKnight.level >= 8 || theKnight.level == 10 || Knight.DragonSword == true)
                     {
                         theKnight.level = 10;
+                        checkStatus(theKnight, Knight, MaxHP, firstLevel);
                     }
                     else
                     {
