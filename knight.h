@@ -765,20 +765,34 @@ int startJourney(knight theKnight, int nEvent, int *arrEvent){
                 break;
 
             case LIGHTWING:
-                if(n < 3)
+                if(Knight.Guinevere > 0)
                 {
-                    i = nEvent -1;
-                }
-                for(int j = i;j <= i+3; j++)
-                {
-                    if(arrEvent[j] == 0)
+                    if(Knight.Guinevere < 3)
                     {
-                        process = true;
-                        result = theKnight.HP + theKnight.DF + theKnight.level + theKnight.remedy + theKnight.gold + theKnight.phoenixdown;
-                        return result;
+                        Knight.Guinevere = -1;
+                        nEvent = -1;
                     }
+                    Knight.Guinevere -= 3;
                 }
-                i += 3;
+                else {
+                    if (n < 3) {
+                        i = nEvent - 1;
+                    }
+                    for (int j = i; j <= i + 3; j++) {
+                        if (arrEvent[j] == 0) {
+                            process = true;
+                            result = theKnight.HP + theKnight.DF + theKnight.level + theKnight.remedy + theKnight.gold +
+                                     theKnight.phoenixdown;
+                            return result;
+                        }
+                        if (arrEvent[j] == GUINEVERE) {
+                            Knight.Guinevere = i;
+                            checkStatus(theKnight, Knight, MaxHP, firstLevel);
+                            break;
+                        }
+                    }
+                    i += 3;
+                }
                 break;
 
             case ODIN:
