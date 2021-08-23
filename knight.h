@@ -54,6 +54,8 @@ struct Status
     int Mythril = -1;
     int Physical = 7;
     int meetOdin = -1;
+    int Guinevere = -1;
+    bool MushKnight = false;
     bool ARTHUR = false;
     bool LANCELOT = false;
     bool PALADIN = false;
@@ -575,11 +577,27 @@ int startJourney(knight theKnight, int nEvent, int *arrEvent){
     Status Knight;
     int firstLevel = theKnight.level;
     int MaxHP = theKnight.HP;
+    int theEvent;
     for (int i = 0; i < nEvent; i++)
     {
         int n = (nEvent -1) - i; // nEvent = số sự kiện
-        checkKnight(theKnight, Knight, MaxHP);
-        int theEvent = arrEvent[i];
+        if(Knight.MushKnight == false) {
+            checkKnight(theKnight, Knight, MaxHP);
+        }
+        if(Knight.Guinevere >0)
+        {
+            Knight.Guinevere--;
+            i--;
+            theEvent = arrEvent[Knight.Guinevere];
+            if(Knight.Guinevere == 0)
+            {
+                theEvent = arrEvent[Knight.Guinevere];
+                Knight.Guinevere = -1;
+            }
+        }
+        else {
+            theEvent = arrEvent[i];
+        }
         switch (theEvent)
         {
             case 0:
@@ -658,13 +676,18 @@ int startJourney(knight theKnight, int nEvent, int *arrEvent){
                 break;
 
             case MUSHGHOST:
-                if(Knight.PALADIN == false) {
-                    Mushghost(theKnight);
+                if(Knight.PALADIN == true || Knight.DragonSword == true || Knight.meetOdin >0) {
+                    checkStatus(theKnight, Knight, MaxHP, firstLevel);
+                    break;
                 }
-                checkStatus(theKnight, Knight, MaxHP, firstLevel);
+                else {
+                    Mushghost(theKnight);
+                    checkStatus(theKnight, Knight, MaxHP, firstLevel);
+                }
                 break;
 
             case MUSHKNIGHT:
+                Knight.MushKnight = true;
                 MaxHP += 50;
                 theKnight.HP = MaxHP;
                 checkMax(theKnight);
@@ -699,6 +722,10 @@ int startJourney(knight theKnight, int nEvent, int *arrEvent){
                     Knight.meetOdin --;
                     break;
                 }
+                if(Knight.DragonSword == true)
+                {
+                    break;
+                }
                 if(theKnight.level >= 7)
                 {
                     break;
@@ -720,6 +747,7 @@ int startJourney(knight theKnight, int nEvent, int *arrEvent){
                 break;
 
             case GUINEVERE:
+                Knight.Guinevere = i;
                 checkStatus(theKnight, Knight, MaxHP, firstLevel);
                 break;
 
@@ -761,23 +789,15 @@ int startJourney(knight theKnight, int nEvent, int *arrEvent){
                 break;
 
             case BOWSER:
-                if(Knight.ARTHUR == true || Knight.LANCELOT == true)
+                if(Knight.ARTHUR == true || Knight.LANCELOT == true || Knight.PALADIN == true && theKnight.level >= 8 || theKnight.level == 10 || Knight.DragonSword == true)
                 {
                     theKnight.level = 10;
                     checkStatus(theKnight, Knight, MaxHP, firstLevel);
                 }
                 else
                 {
-                    if(Knight.PALADIN == true && theKnight.level >= 8 || theKnight.level == 10 || Knight.DragonSword == true)
-                    {
-                        theKnight.level = 10;
-                        checkStatus(theKnight, Knight, MaxHP, firstLevel);
-                    }
-                    else
-                    {
-                        process = false;
-                        break;
-                    }
+                    process = false;
+                    break;
                 }
                 break;
         }
