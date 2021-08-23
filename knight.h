@@ -55,6 +55,8 @@ struct Status
     int Physical = 7;
     int meetOdin = -1;
     int Guinevere = -1;
+    int Gate = -1;
+    bool Done = false;
     bool MushKnight = false;
     bool ARTHUR = false;
     bool LANCELOT = false;
@@ -93,11 +95,11 @@ void checkMax(knight &theKnight)
         theKnight.phoenixdown = 99;
     }
 }
-void checkHP(knight &theKnight, Status &Knight, int i, int s, int MaxHP, bool &process) // MaxHP = Hp lúc đầu
+void checkHP(knight &theKnight, Status &Knight, int &i, int MaxHP, int firstLevel, bool &process) // MaxHP = Hp lúc đầu
 {
     if(Knight.Timegate == true)
     {
-        i = s;
+        i = Knight.Gate;
     }
     else
     {
@@ -111,6 +113,9 @@ void checkHP(knight &theKnight, Status &Knight, int i, int s, int MaxHP, bool &p
             {
                 theKnight.phoenixdown--;
                 theKnight.HP = MaxHP;
+                theKnight.level = firstLevel;
+                Knight.magic = -1;
+                Knight.frog = -1;
             }
         }
     }
@@ -213,10 +218,10 @@ void checklevel0(knight &theKnight, Status &Knight, int theEvent, int i, int fir
                 } else {
                     if (damage > theKnight.DF) {
                         theKnight.HP = theKnight.HP + theKnight.DF - damage;
-                        checkHP(theKnight, Knight, i, s, MaxHP, process);
+                        checkHP(theKnight, Knight, i, MaxHP, firstLevel, process);
                     } else {
                         theKnight.HP -= damage;
-                        checkHP(theKnight, Knight, i, s, MaxHP, process);
+                        checkHP(theKnight, Knight, i, MaxHP, firstLevel, process);
                     }
                 }
             } else {
@@ -239,10 +244,10 @@ void checklevel0(knight &theKnight, Status &Knight, int theEvent, int i, int fir
                     } else {
                         if (damage > theKnight.DF) {
                             theKnight.HP = theKnight.HP + theKnight.DF - damage;
-                            checkHP(theKnight, Knight, i, s, MaxHP, process);
+                            checkHP(theKnight, Knight, i,MaxHP, firstLevel, process);
                         } else {
                             theKnight.HP -= damage;
-                            checkHP(theKnight, Knight, i, s, MaxHP, process);
+                            checkHP(theKnight, Knight, i,MaxHP,firstLevel, process);
                         }
                     }
                 }
@@ -476,7 +481,7 @@ bool SumAbyss(char *str){
     }
 }
 
-void theAbyss(knight &theKnight, int i, int *arrEvent, bool process)
+void theAbyss(knight &theKnight, Status &Knight, int i, int MaxHP, int firstLevel, int *arrEvent, bool process)
 {
     int code2[6]={theKnight.HP, theKnight.DF, theKnight.level, theKnight.remedy, theKnight.gold, theKnight.phoenixdown};
     string codeabyss;
@@ -493,6 +498,10 @@ void theAbyss(knight &theKnight, int i, int *arrEvent, bool process)
     char* code = new char[codeabyss.size() + 1];
     strcpy(code, codeabyss.c_str());
     if(SumAbyss(code)){
+        return;
+    }
+    else if (theKnight.phoenixdown > 0) {
+        checkHP(theKnight, Knight, i,MaxHP, firstLevel, process);                 ///using phoenixDown
         return;
     }
     else{
@@ -587,17 +596,17 @@ int startJourney(knight theKnight, int nEvent, int *arrEvent){
         if(Knight.Guinevere >0)
         {
             Knight.Guinevere--;
-            i--;
+            nEvent++;
             theEvent = arrEvent[Knight.Guinevere];
             if(Knight.Guinevere == 0)
             {
-                theEvent = arrEvent[Knight.Guinevere];
                 Knight.Guinevere = -1;
             }
         }
         else {
             theEvent = arrEvent[i];
         }
+
         switch (theEvent)
         {
             case 0:
@@ -736,13 +745,16 @@ int startJourney(knight theKnight, int nEvent, int *arrEvent){
                 }
                 else
                 {
-                    theAbyss(theKnight, i,arrEvent,process);
+                    theAbyss(theKnight,Knight,i,MaxHP,firstLevel,arrEvent,process);
                 }
                 checkStatus(theKnight, Knight, MaxHP, firstLevel);
                 break;
 
             case TIMEGATE:
                 Knight.Timegate = true;
+                if(Knight.Timegate == true){
+                    Knight.Gate = i;
+                }
                 checkStatus(theKnight, Knight, MaxHP, firstLevel);
                 break;
 
