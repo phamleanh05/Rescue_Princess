@@ -786,7 +786,8 @@ int startJourney(knight theKnight, int nEvent, int *arrEvent){
                             return result;
                         }
                         if (arrEvent[j] == GUINEVERE) {
-                            Knight.Guinevere = i;
+                            Knight.Guinevere = i+1;
+                            i -= 3;
                             checkStatus(theKnight, Knight, MaxHP, firstLevel);
                             break;
                         }
