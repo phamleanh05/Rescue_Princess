@@ -601,6 +601,7 @@ int startJourney(knight theKnight, int nEvent, int *arrEvent){
             if(Knight.Guinevere == 0)
             {
                 Knight.Guinevere = -1;
+                nEvent = -1;
             }
         }
         else {
