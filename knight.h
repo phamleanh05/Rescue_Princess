@@ -577,6 +577,7 @@ int startJourney(knight theKnight, int nEvent, int *arrEvent){
     int MaxHP = theKnight.HP;
     for (int i = 0; i < nEvent; i++)
     {
+        int n = (nEvent -1) - i; // nEvent = số sự kiện
         checkKnight(theKnight, Knight, MaxHP);
         int theEvent = arrEvent[i];
         switch (theEvent)
@@ -723,7 +724,20 @@ int startJourney(knight theKnight, int nEvent, int *arrEvent){
                 break;
 
             case LIGHTWING:
-                i = i+3;
+                if(n < 3)
+                {
+                    i = nEvent -1;
+                }
+                for(int j = i;j <= i+3; j++)
+                {
+                    if(arrEvent[j] == 0)
+                    {
+                        process = true;
+                        result = theKnight.HP + theKnight.DF + theKnight.level + theKnight.remedy + theKnight.gold + theKnight.phoenixdown;
+                        return result;
+                    }
+                }
+                i += 3;
                 break;
 
             case ODIN:
@@ -742,11 +756,6 @@ int startJourney(knight theKnight, int nEvent, int *arrEvent){
                 if(Knight.Dragon == true)
                 {
                     Knight.DragonSword = true;
-                    cout << "hiep sy rong" << endl;
-                }
-                else
-                {
-                    cout<<"not"<<endl;
                 }
                 checkStatus(theKnight, Knight, MaxHP, firstLevel);
                 break;
