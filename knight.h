@@ -140,7 +140,7 @@ void checkStatus(knight &theKnight, Status &Knight,int MaxHP, int firstLevel)
     if(Knight.magic > 0)
     {
         Knight.magic--;
-        if(Knight.magic == 0) {
+        if(Knight.magic == 0 ) {
             theKnight.HP = theKnight.HP * 5;
             Knight.magic = -1;
             if(theKnight.HP >= MaxHP)
@@ -257,7 +257,7 @@ void checklevel0(knight &theKnight, Status &Knight, int theEvent, int i, int fir
     }
 }
 
-void ShamanVajsh(knight &theKnight, Status &Knight, int i, int firstLevel, int MaxHP, int theEvent, bool &process){
+void ShamanVajsh(knight &theKnight, Status &Knight, int i, int firstLevel, int MaxHP, int *arrEvent, bool &process){
     i++;
     int b = i % 10;
     int levelO = i > 6 ? (b > 5 ? b : 5) : b;
@@ -282,7 +282,7 @@ void ShamanVajsh(knight &theKnight, Status &Knight, int i, int firstLevel, int M
                 checkStatus(theKnight, Knight, MaxHP, firstLevel);
             } else {
                 if (Knight.Expoor == true) {
-                    if (theKnight.level < levelO && theEvent == 6) {
+                    if (theKnight.level < levelO && arrEvent[i-1] == 6) {
                         Knight.magic = 3;
                         theKnight.HP = theKnight.HP / 5;
                         if (theKnight.remedy >= 1) {
@@ -294,7 +294,7 @@ void ShamanVajsh(knight &theKnight, Status &Knight, int i, int firstLevel, int M
                                 theKnight.HP = 1;
                             }
                         }
-                    } else if (theKnight.level < levelO && theEvent == 7) {
+                    } else if (theKnight.level < levelO && arrEvent[i-1] == 7) {
                         Knight.frog = 3;
                         theKnight.level = 1;
                         if (theKnight.remedy >= 1) {
@@ -311,7 +311,7 @@ void ShamanVajsh(knight &theKnight, Status &Knight, int i, int firstLevel, int M
                     } else if (theKnight.level == levelO) {
                         theKnight.level = theKnight.level;
                         theKnight.DF = theKnight.DF;
-                    } else if (theKnight.level < levelO && theEvent == 6) {
+                    } else if (theKnight.level < levelO && arrEvent[i-1] == 6) {
                         Knight.magic = 3;
                         theKnight.HP = theKnight.HP / 5;
                         if (theKnight.remedy >= 1) {
@@ -323,7 +323,7 @@ void ShamanVajsh(knight &theKnight, Status &Knight, int i, int firstLevel, int M
                                 theKnight.HP = 1;
                             }
                         }
-                    } else if (theKnight.level < levelO && theEvent == 7) {
+                    } else if (theKnight.level < levelO && arrEvent[i-1] == 7) {
                         Knight.frog = 3;
                         theKnight.level = 1;
                         if (theKnight.remedy >= 1) {
@@ -345,7 +345,7 @@ void checkExcal(knight &theKnight, Status &Knight, int theEvent, int i, int firs
     }
     else if(Knight.meetOdin > 0 && arrEvent[i] == 6 || arrEvent[i] == 7)
     {
-        ShamanVajsh(theKnight, Knight, i, firstLevel, MaxHP, theEvent, process);
+        ShamanVajsh(theKnight, Knight, i, firstLevel, MaxHP, arrEvent, process);
     }
     else {
         if (Knight.Excal == true) {
@@ -359,14 +359,14 @@ void checkExcal(knight &theKnight, Status &Knight, int theEvent, int i, int firs
                     theKnight.gold = theKnight.gold + gold[theEvent];
                     checkMax(theKnight);
                 } else if (arrEvent[i] == 6 || arrEvent[i] == 7) {
-                    ShamanVajsh(theKnight, Knight, i, firstLevel, MaxHP, theEvent, process);
+                    ShamanVajsh(theKnight, Knight, i, firstLevel, MaxHP, arrEvent, process);
                 }
             }
         } else {
             if (theEvent < 6) {
                 checklevel0(theKnight, Knight, theEvent, i, firstLevel, process);
             } else if (theEvent == 6 || theEvent == 7) {
-                ShamanVajsh(theKnight, Knight, i, firstLevel, MaxHP, theEvent, process);
+                ShamanVajsh(theKnight, Knight, i, firstLevel, MaxHP, arrEvent, process);
             }
         }
     }
@@ -786,10 +786,10 @@ int startJourney(knight theKnight, int nEvent, int *arrEvent){
                             return result;
                         }
                         if (arrEvent[j] == GUINEVERE) {
-                            Knight.Guinevere = i+1;
-                            i -= 3;
-                            checkStatus(theKnight, Knight, MaxHP, firstLevel);
-                            break;
+                            process = true;
+                            result = theKnight.HP + theKnight.DF + theKnight.level + theKnight.remedy + theKnight.gold +
+                                     theKnight.phoenixdown;
+                            return result;
                         }
                     }
                     i += 3;
